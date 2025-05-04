@@ -77,6 +77,7 @@ class PerfTool:
         output_file = os.path.join(self.output_dir, 'perf.data')
         cmd = ['perf', 'record', '-F', str(frequency)]
         
+        cmd.append('-a')
         # Add events
         if events:
             # event_str = ','.join(events)
@@ -159,7 +160,7 @@ class PerfTool:
                                  'L1-dcache-load-misses', 'L1-icache-load-misses'])
         cpu_range = self.config.get('perf_stat_cpu_range', 'all')
         all_threads = self.config.get('perf_stat_all_threads', True)
-        perf_output_path = self.config.get('perf_stat_output_path', 'pef-stat.csv')
+        # perf_output_path = self.config.get('perf_stat_output_path', 'pef-stat.csv')
         # exclude_self = self.config.get('perf_stat_exclude_self', True)
         stat_workload = self.config.get('perf_stat_workload', 'bench futex hash')
         
@@ -167,13 +168,16 @@ class PerfTool:
         output_file = os.path.join(self.output_dir, 'perf_stat.txt')
         cmd = ['perf', 'stat']
         
+        # Add system-wide mode (required when using -A)
+        cmd.append('-a')
+        
         if count_deltas:
-            cmd.extend(['-I', count_deltas])
+            cmd.extend(['-I', str(count_deltas)])
             
         # Add events
         if events:
-            for event in events:
-                cmd.extend(['-e', event])
+            event_str = ','.join(events)
+            cmd.extend(['-e', event_str])
         
         if cpu_range != 'all':
             # convert cpu_range from str '0-3' to list of individual cores, e.g. "0,1,2,3"
@@ -196,8 +200,8 @@ class PerfTool:
             # # We'll log this but won't attempt to use the unsupported option
             # self.logger.info(f"Note: Cannot exclude current process (PID: {current_pid}) as --exclude-pid is not supported")
             
-        if perf_output_path:
-            cmd.extend(['-o', perf_output_path])
+        # if perf_output_path:
+            # cmd.extend(['-o', perf_output_path])
 
         # Run for specified duration
         if duration:
