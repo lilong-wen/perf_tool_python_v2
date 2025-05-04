@@ -1,0 +1,34 @@
+# Performance tool configuration
+
+# Data storage location
+output_directory: "/tmp/perf_results"
+
+# perf-record configuration
+perf_record_frequency: 999  # Hz
+perf_record_events: 
+  - cycles
+  - instructions
+perf_record_duration: 120  # seconds or None
+perf_record_workload: bench futex hash # if perf_record_duration is not None, this parameter will be ignored
+perf_record_exclude_self: True  # exclude self
+
+# perf-annotation configuration
+use_perf_annotation: true
+
+# perf-stat configuration
+perf_stat_count_deltas: 1000
+perf_stat_events:
+  - cycles
+  - instructions
+  - branch-misses
+  - L1-dcache-load-misses
+  - L1-icache-load-misses
+  - LLC-load-misses
+  - iTLB-load-misses
+  - dTLB-load-misses
+perf_stat_duration: 10  # seconds or None
+perf_stat_workload: bench futex hash # if perf_stat_duration is not None, this parameter will be ignored
+perf_stat_cpu_range: all # all or range number like 0-3
+perf_stat_all-threads: True
+perf_stat_output_path: perf-stat.csv
+perf_stat_exclude_self: True
