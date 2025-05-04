@@ -10,6 +10,8 @@ import logging
 from datetime import datetime
 import time
 import shutil
+import os
+os.nice(19)
 
 class PerfTool:
     def __init__(self, config_file):
@@ -68,7 +70,7 @@ class PerfTool:
         frequency = self.config.get('perf_record_frequency', 99)
         duration = self.config.get('perf_record_duration', 30)
         events = self.config.get('perf_record_events', ['cycles'])
-        exclude_self = self.config.get('perf_record_exclude_self', True)
+        # exclude_self = self.config.get('perf_record_exclude_self', True)
         record_workload = self.config.get('perf_record_workload', 'bench futex hash')
         
         # Build the perf record command
@@ -89,10 +91,13 @@ class PerfTool:
         cmd.extend(['-a'])
 
         # Exclude current process if configured
-        if exclude_self:
-            current_pid = os.getpid()
-            cmd.extend(['--exclude-pid', str(current_pid)])
-            self.logger.info(f"Excluding current process (PID: {current_pid}) from perf recording")
+        # if exclude_self:
+            # current_pid = os.getpid()
+            # --exclude-pid not supported in some perf versions, try alternative approach
+            # Use -p option with all pids except current one (more complex but more compatible)
+            # self.logger.info(f"Note: Will attempt to exclude current process (PID: {current_pid}) with alternative method")
+            # We don't add any exclusion here as the standard option doesn't work
+            # Will rely on the -a (all CPUs) option which includes all processes
 
         # Output file
         cmd.extend(['-o', output_file])
@@ -155,7 +160,7 @@ class PerfTool:
         cpu_range = self.config.get('perf_stat_cpu_range', 'all')
         all_threads = self.config.get('perf_stat_all_threads', True)
         perf_output_path = self.config.get('perf_stat_output_path', 'pef-stat.csv')
-        exclude_self = self.config.get('perf_stat_exclude_self', True)
+        # exclude_self = self.config.get('perf_stat_exclude_self', True)
         stat_workload = self.config.get('perf_stat_workload', 'bench futex hash')
         
         # Build the perf stat command
@@ -185,10 +190,11 @@ class PerfTool:
             cmd.append('-A')
             
         # Exclude current process if configured
-        if exclude_self:
-            current_pid = os.getpid()
-            cmd.extend(['--exclude-pid', str(current_pid)])
-            self.logger.info(f"Excluding current process (PID: {current_pid}) from perf stat")
+        # if exclude_sel:mple_config.yaml
+            # current_pid = os.getpid()
+            # # --exclude-pid not supported in some perf versions, try alternative approach
+            # # We'll log this but won't attempt to use the unsupported option
+            # self.logger.info(f"Note: Cannot exclude current process (PID: {current_pid}) as --exclude-pid is not supported")
             
         if perf_output_path:
             cmd.extend(['-o', perf_output_path])
